@@ -42,7 +42,7 @@ public class Main implements Errors {
             return sw.toString();
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("An error occurred while trying to map the object to JSON.");
+            return "{\"error\": \"An error occurred while trying to map the object to JSON.\"}";
         }
     }
 
@@ -64,15 +64,14 @@ public class Main implements Errors {
                         response.status(SC_OK);
                         fileModule.save(json + "~", "cards.txt", true);
                         return json;
-                    } catch (JsonParseException jpe) {
+                    } catch (JsonParseException ex) {
                         response.status(SC_BAD_REQUEST);
-                        return dataToJson(Errors.parseException(jpe));
+                        return dataToJson(Errors.parseException(ex));
                     } catch (UnrecognizedPropertyException ex) {
                         response.status(SC_BAD_REQUEST);
                         return dataToJson(Errors.unrecognisedProperty(ex));
                     } catch (Exception ex) {
                         response.status(HTTP_TEAPOT);
-                        System.out.println("mhm");
                         return dataToJson(Errors.invalid(ex));
                     }
                 });
@@ -114,29 +113,32 @@ public class Main implements Errors {
                         response.type("application/json");
                         response.status(SC_BAD_REQUEST);
                         try {
-                            response.status(SC_OK);
                             CountryList countryList = module.banCountry(request);
                             String json             = dataToJson(countryList);
                             fileModule.saveCountries(countryList.getCountries(), true);
+                            response.status(SC_OK);
                             return String.format("{\"banned\":%s}", json);
-                        } catch (JsonParseException jpe) {
-                            return dataToJson(Errors.parseException(jpe));
+                        } catch (JsonParseException ex) {
+                            return dataToJson(Errors.parseException(ex));
                         } catch (UnrecognizedPropertyException ex) {
                             return dataToJson(Errors.unrecognisedProperty(ex));
                         } catch (Exception ex) {
-                            return dataToJson(new ResponseError(
-                                    SC_BAD_REQUEST,
-                                    "An error occured while trying to ban a country",
-                                    "Could not ban the provided country: " + ex
-                            ));
+                            response.status(SC_INTERNAL_SERVER_ERROR);
+                            return dataToJson(Errors.banException(ex));
                         }
                     });
 
                     // Retrieves the list of banned countries
                     get("/", (request, response) -> {
                         response.type("application/json");
-                        return  String.format("{\"banned\":%s}", dataToJson(database.getBannedCountries())
-                        );
+                        response.status(SC_BAD_REQUEST);
+                        try {
+                            response.status(SC_OK);
+                            return String.format("{\"banned\":%s}", dataToJson(database.getBannedCountries()));
+                        } catch (Exception ex) {
+                            response.status(SC_INTERNAL_SERVER_ERROR);
+                            return dataToJson(Errors.unexpectedError(ex));
+                        }
                     });
 
                 });
@@ -145,20 +147,17 @@ public class Main implements Errors {
                     response.type("application/json");
                     response.status(SC_BAD_REQUEST);
                     try {
-                        response.status(SC_OK);
                         CountryList unbanned = module.unbanCountry(request);
                         fileModule.saveCountries(database.getBannedCountries(), false);
+                        response.status(SC_OK);
                         return String.format("{\"banned\":%s}", dataToJson(unbanned));
-                    } catch (JsonParseException jpe) {
-                        return dataToJson(Errors.parseException(jpe));
+                    } catch (JsonParseException ex) {
+                        return dataToJson(Errors.parseException(ex));
                     } catch (UnrecognizedPropertyException ex) {
                         return dataToJson(Errors.unrecognisedProperty(ex));
                     } catch (Exception ex) {
-                        return new ResponseError(
-                                SC_BAD_REQUEST,
-                                "An error occured while trying to unban a country",
-                                "Could not unban the provided country: " + ex
-                        );
+                        response.status(SC_INTERNAL_SERVER_ERROR);
+                        return dataToJson(Errors.unbanException(ex));
                     }
                 });
             });

@@ -26,8 +26,9 @@ public class FileModule {
             StringWriter sw = new StringWriter();
             mapper.writeValue(sw, data);
             return sw.toString();
-        } catch (IOException e) {
-            throw new RuntimeException("An error occurred while trying to map the object to JSON.");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return "{\"error\": \"An error occurred while trying to map the object to JSON.\"}";
         }
     }
 
@@ -44,8 +45,9 @@ public class FileModule {
             try {
                 CreditCard card = new ObjectMapper().readValue(data, CreditCard.class);
                 cards.put(card.getId(), card);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (IOException ex) {
+                // TODO: Implement logger
+                System.out.println("[Error] - Could not load countries: " + ex);
             }
         }
         return cards;
@@ -57,7 +59,7 @@ public class FileModule {
      * @return The list of countries to be banned in CoolTempDatabase
      */
     public ArrayList<String> loadBannedCountries() {
-        ArrayList<String> countries;
+        ArrayList<String> countries = new ArrayList<>();
         List<String> data = Arrays.asList(
                 load("banned-countries.txt").replaceAll("\n", "").split(",")
         );
@@ -68,12 +70,11 @@ public class FileModule {
             try {
                 String create = String.format("{\"countries\":%s}", dataToJson(data));
                 CountryList countryList = new ObjectMapper().readValue(create, CountryList.class);
-                countries               = new ArrayList<>(countryList.getCountries());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                countries.addAll(countryList.getCountries());
+            } catch (IOException ex) {
+                // TODO: Implement logger
+                System.out.println("[Error] - Could not load countries: " + ex);
             }
-        } else {
-            countries = new ArrayList<>();
         }
         return countries;
     }
@@ -87,6 +88,7 @@ public class FileModule {
              PrintWriter out = new PrintWriter(new BufferedWriter(fw))) {
             out.println(data);
         } catch (Exception e) {
+            // TODO: Implement logger
             System.out.println("[Error] - Could not save to file " + fileName);
         }
     }
@@ -110,20 +112,20 @@ public class FileModule {
      * @return The content of the file
      */
     public String load(String filename) {
+        StringBuilder sb = new StringBuilder();
         try (
                 FileReader fr = new FileReader("src/main/resources/" + filename);
                 BufferedReader br = new BufferedReader(fr)
         ) {
-            StringBuilder sb = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) {
-                sb.append(String.format("%s%s", line,"\n"));
+                sb.append(String.format("%s%s", line, "\n"));
             }
-            return sb.toString();
         } catch (Exception ex) {
+            // TODO: Implement logger
             System.out.println("[ERROR] - Could not load the file " + filename + ". " + ex);
-            return "";
         }
+        return sb.toString();
     }
 
 }

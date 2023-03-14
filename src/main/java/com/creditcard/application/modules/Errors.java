@@ -4,8 +4,7 @@ import com.creditcard.application.models.ResponseError;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static javax.servlet.http.HttpServletResponse.*;
 
 /**
  * Contains all the basic error messages that can be caught
@@ -26,6 +25,22 @@ public interface Errors {
                 SC_BAD_REQUEST,
                 "",
                 "UnrecognizedPropertyException: " + ex.getPropertyName()
+        );
+    }
+
+    static ResponseError banException(Exception ex) {
+        return new ResponseError(
+                SC_INTERNAL_SERVER_ERROR,
+                "An error occured while trying to ban a country",
+                "Could not ban the provided country: " + ex
+        );
+    }
+
+    static ResponseError unbanException(Exception ex) {
+        return new ResponseError(
+                SC_INTERNAL_SERVER_ERROR,
+                "An error occured while trying to unban a country",
+                "Could not unban the provided country: " + ex
         );
     }
 
