@@ -1,5 +1,6 @@
 package com.creditcard.application.modules;
 
+import com.creditcard.application.datahandler.CoolTempDatabase;
 import com.creditcard.application.models.cards.CountryList;
 import com.creditcard.application.models.cards.CreditCard;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -66,7 +67,7 @@ public class FileModule {
         if (!data.isEmpty() & !data.get(0).isEmpty()) {
             data.removeIf(String::isEmpty);
             try {
-                String create = String.format("{\"countries\":%s}", dataToJson(data));
+                String create           = String.format("{\"countries\":%s}", dataToJson(data));
                 CountryList countryList = new ObjectMapper().readValue(create, CountryList.class);
                 countries               = new ArrayList<>(countryList.getCountries());
             } catch (IOException e) {
@@ -76,6 +77,10 @@ public class FileModule {
             countries = new ArrayList<>();
         }
         return countries;
+    }
+
+    public String getBannedCountries(CoolTempDatabase database) {
+        return String.format("{\"banned\":%s}", dataToJson(database.getBannedCountries()));
     }
 
     /**

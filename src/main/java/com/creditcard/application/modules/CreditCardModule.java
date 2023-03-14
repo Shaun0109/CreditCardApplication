@@ -2,6 +2,7 @@ package com.creditcard.application.modules;
 
 import com.creditcard.application.datahandler.CoolTempDatabase;
 import com.creditcard.application.models.cards.*;
+import com.creditcard.application.models.exceptions.InvalidCardException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import spark.Request;
 
@@ -81,7 +82,7 @@ public class CreditCardModule {
         ValidResponse validCard = validateCard(creation);
 
         if (!validCard.isValid) {
-            throw new Exception("Invalid card presented");
+            throw new InvalidCardException();
         }
 
         return database.insertCreditCard(creation, validCard.cardDetails);
@@ -128,6 +129,13 @@ public class CreditCardModule {
     // ============================================= Banned Countries ==================================================
     // =================================================================================================================
 
+    /**
+     * Adds a country to a banned list
+     *
+     * @param request The request that contains the body for the banned countries
+     * @return The list of countries to be banned
+     * @throws Exception Any errors that occur that will be caught by the main class
+     */
     public CountryList banCountry(Request request) throws Exception {
         CountryList countryList = new ObjectMapper().readValue(request.body(), CountryList.class);
         List<String> countries  = database.banCountries(countryList.getCountries());
@@ -135,6 +143,13 @@ public class CreditCardModule {
         return countryList;
     }
 
+    /**
+     * Removes a country to a banned list
+     *
+     * @param request The request that contains the body for the unbanned countries
+     * @return The list of countries to be unbanned
+     * @throws Exception Any errors that occur that will be caught by the main class
+     */
     public CountryList unbanCountry(Request request) throws Exception {
         CountryList countryList = new ObjectMapper().readValue(request.body(), CountryList.class);
         database.unbanCountries(countryList.getCountries());

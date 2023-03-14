@@ -1,6 +1,7 @@
 package com.creditcard.application.modules;
 
-import com.creditcard.application.models.ResponseError;
+import com.creditcard.application.models.exceptions.ResponseError;
+import com.creditcard.application.models.exceptions.InvalidCardException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
@@ -8,12 +9,10 @@ import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 
 /**
- * Contains all the basic error messages that can be caught
+ * Contains all the basic error messages that can be caught by the ErrorHandler
+ * @see ErrorHandler
  */
-public interface Errors {
-
-    // I use this because it is a fun easter-egg response code
-    int HTTP_TEAPOT = 418;
+public abstract class Errors {
 
     /**
      * Error Response for when there is any unrecognised property in the body of the request
@@ -21,7 +20,7 @@ public interface Errors {
      * @param ex The exception
      * @return The response in an error form
      */
-    static ResponseError unrecognisedProperty(UnrecognizedPropertyException ex) {
+    public ResponseError unrecognisedProperty(UnrecognizedPropertyException ex) {
         return new ResponseError(
                 SC_BAD_REQUEST,
                 "",
@@ -35,7 +34,9 @@ public interface Errors {
      * @param ex The exception
      * @return The response in an error form
      */
-    static ResponseError invalid(Exception ex) {
+    public ResponseError invalid(InvalidCardException ex) {
+        // I use this because it is a fun easter-egg response code
+        int HTTP_TEAPOT = 418;
         return new ResponseError(
                 HTTP_TEAPOT,
                 "The card is an invalid card. No coffee for you!",
@@ -49,7 +50,7 @@ public interface Errors {
      * @param jpe The exception
      * @return The response in an error form
      */
-    static ResponseError parseException(JsonParseException jpe) {
+    public ResponseError parseException(JsonParseException jpe) {
         return new ResponseError(
                 SC_BAD_REQUEST,
                 "There was an error during the attempt to parse the json.",
@@ -63,7 +64,7 @@ public interface Errors {
      * @param ex The exception
      * @return The response in an error form
      */
-    static ResponseError notFound(Exception ex) {
+    public ResponseError notFound(Exception ex) {
         return new ResponseError(
                 SC_NOT_FOUND,
                 "Unable to find a resource for the specific requirements.",
@@ -77,9 +78,9 @@ public interface Errors {
      * @param ex The exception
      * @return The response in an error form
      */
-    static ResponseError unexpectedError(Exception ex) {
+    public ResponseError unexpectedError(Exception ex) {
         return new ResponseError(
-                SC_NOT_FOUND,
+                SC_BAD_REQUEST,
                 "",
                 "Oops. An unknown error has occurred, rest assured our devs are hard at work fixing it! Log: " + ex.getMessage()
         );

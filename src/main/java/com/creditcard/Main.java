@@ -1,16 +1,14 @@
 package com.creditcard;
 
 import com.creditcard.application.datahandler.CoolTempDatabase;
-import com.creditcard.application.models.ResponseError;
+import com.creditcard.application.models.exceptions.ResponseError;
 import com.creditcard.application.models.cards.CountryList;
 import com.creditcard.application.models.cards.CreditCard;
 import com.creditcard.application.modules.CreditCardModule;
-import com.creditcard.application.modules.Errors;
+import com.creditcard.application.modules.ErrorHandler;
 import com.creditcard.application.modules.FileModule;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -23,9 +21,7 @@ import static spark.Spark.*;
 /**
  * Main class for the application that contains all the routes and instantiated modules
  */
-public class Main implements Errors {
-
-    private static final FileModule fileModule = new FileModule();
+public class Main {
 
     /**
      * Converts the Object/Model to json, so it can be used in a response
@@ -49,8 +45,10 @@ public class Main implements Errors {
     public static void main(String[] args) {
 
         // Initialise core modules
-        CoolTempDatabase database = new CoolTempDatabase(fileModule.loadCards(), fileModule.loadBannedCountries());
-        CreditCardModule module   = new CreditCardModule(database);
+        final FileModule fileModule     = new FileModule();
+        final CoolTempDatabase database = new CoolTempDatabase(fileModule.loadCards(), fileModule.loadBannedCountries());
+        final CreditCardModule module   = new CreditCardModule(database);
+        final ErrorHandler errorHandler = new ErrorHandler();
 
         // All the routes that can be accessed
         path("/api/v1", () -> {
@@ -64,16 +62,10 @@ public class Main implements Errors {
                         response.status(SC_OK);
                         fileModule.save(json + "~", "cards.txt", true);
                         return json;
-                    } catch (JsonParseException jpe) {
-                        response.status(SC_BAD_REQUEST);
-                        return dataToJson(Errors.parseException(jpe));
-                    } catch (UnrecognizedPropertyException ex) {
-                        response.status(SC_BAD_REQUEST);
-                        return dataToJson(Errors.unrecognisedProperty(ex));
                     } catch (Exception ex) {
-                        response.status(HTTP_TEAPOT);
-                        System.out.println("mhm");
-                        return dataToJson(Errors.invalid(ex));
+                        ResponseError error = errorHandler.handleException(ex);
+                        response.status(error.getStatusCode());
+                        return dataToJson(error);
                     }
                 });
 
@@ -86,8 +78,9 @@ public class Main implements Errors {
                         response.type("application/json");
                         return dataToJson(fetchedCards);
                     } catch (Exception ex) {
-                        response.status(SC_INTERNAL_SERVER_ERROR);
-                        return dataToJson(Errors.unexpectedError(ex));
+                        ResponseError error = errorHandler.handleException(ex);
+                        response.status(error.getStatusCode());
+                        return dataToJson(error);
                     }
                 });
 
@@ -98,12 +91,10 @@ public class Main implements Errors {
                         CreditCard card = database.getCardById(UUID.fromString(request.params(":id")));
                         response.status(SC_OK);
                         return dataToJson(card);
-                    } catch (NullPointerException ex) {
-                        response.status(SC_NOT_FOUND);
-                        return dataToJson(Errors.notFound(ex));
                     } catch (Exception ex) {
-                        response.status(SC_INTERNAL_SERVER_ERROR);
-                        return dataToJson(Errors.unexpectedError(ex));
+                        ResponseError error = errorHandler.handleException(ex);
+                        response.status(error.getStatusCode());
+                        return dataToJson(error);
                     }
                 });
             });
@@ -119,16 +110,10 @@ public class Main implements Errors {
                             String json             = dataToJson(countryList);
                             fileModule.saveCountries(countryList.getCountries(), true);
                             return String.format("{\"banned\":%s}", json);
-                        } catch (JsonParseException jpe) {
-                            return dataToJson(Errors.parseException(jpe));
-                        } catch (UnrecognizedPropertyException ex) {
-                            return dataToJson(Errors.unrecognisedProperty(ex));
-                        } catch (Exception ex) {
-                            return dataToJson(new ResponseError(
-                                    SC_BAD_REQUEST,
-                                    "An error occured while trying to ban a country",
-                                    "Could not ban the provided country: " + ex
-                            ));
+                        } catch (Exception ex) { //TODO: Specific ban country error handling
+                            ResponseError error = errorHandler.handleException(ex);
+                            response.status(error.getStatusCode());
+                            return dataToJson(error);
                         }
                     });
 
@@ -138,7 +123,6 @@ public class Main implements Errors {
                         return  String.format("{\"banned\":%s}", dataToJson(database.getBannedCountries())
                         );
                     });
-
                 });
                 // Unbans a country
                 post("/unban", (request, response) -> {
@@ -148,17 +132,11 @@ public class Main implements Errors {
                         response.status(SC_OK);
                         CountryList unbanned = module.unbanCountry(request);
                         fileModule.saveCountries(database.getBannedCountries(), false);
-                        return String.format("{\"banned\":%s}", dataToJson(unbanned));
-                    } catch (JsonParseException jpe) {
-                        return dataToJson(Errors.parseException(jpe));
-                    } catch (UnrecognizedPropertyException ex) {
-                        return dataToJson(Errors.unrecognisedProperty(ex));
-                    } catch (Exception ex) {
-                        return new ResponseError(
-                                SC_BAD_REQUEST,
-                                "An error occured while trying to unban a country",
-                                "Could not unban the provided country: " + ex
-                        );
+                        return String.format("{\"unbanned\":%s}", dataToJson(unbanned));
+                    } catch (Exception ex) { //TODO: Specific unban country error handling
+                        ResponseError error = errorHandler.handleException(ex);
+                        response.status(error.getStatusCode());
+                        return dataToJson(error);
                     }
                 });
             });

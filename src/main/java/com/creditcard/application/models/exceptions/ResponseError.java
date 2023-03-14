@@ -1,4 +1,4 @@
-package com.creditcard.application.models;
+package com.creditcard.application.models.exceptions;
 
 import lombok.Data;
 
