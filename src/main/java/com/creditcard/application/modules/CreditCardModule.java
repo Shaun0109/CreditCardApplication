@@ -1,11 +1,20 @@
 package com.creditcard.application.modules;
 
 import com.creditcard.application.datahandler.CoolTempDatabase;
-import com.creditcard.application.models.cards.*;
+import com.creditcard.application.models.cards.CardCreate;
+import com.creditcard.application.models.cards.CardResponse;
+import com.creditcard.application.models.cards.CountryList;
+import com.creditcard.application.models.cards.CreditCard;
+import com.creditcard.application.models.exceptions.BannedCountryException;
+import com.creditcard.application.models.exceptions.DuplicateCardException;
+import com.creditcard.application.models.exceptions.InvalidCardException;
+import com.creditcard.application.models.exceptions.UnBannedCountryException;
+import com.creditcard.application.models.responses.ValidResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import spark.Request;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -44,8 +53,7 @@ public class CreditCardModule {
 
             // If there is an OK status then process the response
             switch (status) {
-                case 200:
-                case 201:
+                case 200, 201 -> {
                     BufferedReader br = new BufferedReader(new InputStreamReader(response.getInputStream()));
                     StringBuilder sb  = new StringBuilder();
                     String line;
@@ -54,6 +62,7 @@ public class CreditCardModule {
                     }
                     br.close();
                     return sb.toString();
+                }
             }
         } finally {
             if (response != null) {
@@ -81,7 +90,7 @@ public class CreditCardModule {
         ValidResponse validCard = validateCard(creation);
 
         if (!validCard.isValid) {
-            throw new Exception("Invalid card presented");
+            throw new InvalidCardException();
         }
 
         return database.insertCreditCard(creation, validCard.cardDetails);
@@ -107,19 +116,17 @@ public class CreditCardModule {
         CardResponse cardDetails = new ObjectMapper().readValue(json, CardResponse.class);
         boolean isBanned         = database.isBanned(cardDetails.getCountry().getName());
         boolean isDuplicate      = database.isCardDuplicate(cardNumber);
-        System.out.println("isBanned: " + isBanned);
         if (isDuplicate) {
-            throw new Exception("The card is already saved");
+            throw new DuplicateCardException();
         } else {
             if (cardNumber.length() == 16) {
                 if (!isBanned) {
-                    System.out.println("Raise banned");
                     return new ValidResponse(true, cardDetails);
                 } else {
-                    throw new Exception("The country is banned");
+                    throw new BannedCountryException();
                 }
             } else {
-                throw new Exception("The card number is not valid");
+                throw new InvalidCardException("The card number provided is invalid.");
             }
         }
     }
@@ -128,17 +135,43 @@ public class CreditCardModule {
     // ============================================= Banned Countries ==================================================
     // =================================================================================================================
 
-    public CountryList banCountry(Request request) throws Exception {
-        CountryList countryList = new ObjectMapper().readValue(request.body(), CountryList.class);
-        List<String> countries  = database.banCountries(countryList.getCountries());
-        countryList.setCountries(countries);
-        return countryList;
+    /**
+     * Adds a country to a banned list
+     *
+     * @param request The request that contains the body for the banned countries
+     * @return The list of countries to be banned
+     * @throws BannedCountryException Any errors that occur that will be caught by the main class
+     */
+    public CountryList banCountry(Request request) throws BannedCountryException {
+        try {
+            CountryList countryList = new ObjectMapper().readValue(request.body(), CountryList.class);
+            List<String> countries  = database.banCountries(countryList.getCountries());
+            countryList.setCountries(countries);
+            return countryList;
+        } catch (IOException ex) {
+            throw new BannedCountryException(ex.getMessage());
+        } catch (Exception ex) {
+            throw new BannedCountryException("An unexpected error occurred while trying to ban a country.");
+        }
     }
 
-    public CountryList unbanCountry(Request request) throws Exception {
-        CountryList countryList = new ObjectMapper().readValue(request.body(), CountryList.class);
-        database.unbanCountries(countryList.getCountries());
-        return countryList;
+    /**
+     * Removes a country to a banned list
+     *
+     * @param request The request that contains the body for the unbanned countries
+     * @return The list of countries to be unbanned
+     * @throws UnBannedCountryException Any errors that occur that will be caught by the main class
+     */
+    public CountryList unbanCountry(Request request) throws UnBannedCountryException {
+        try {
+            CountryList countryList = new ObjectMapper().readValue(request.body(), CountryList.class);
+            database.unbanCountries(countryList.getCountries());
+            return countryList;
+        } catch (IOException ex) {
+            throw new UnBannedCountryException(ex.getMessage());
+        } catch (Exception ex) {
+            throw new UnBannedCountryException();
+        }
     }
 
 }

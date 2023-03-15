@@ -40,6 +40,10 @@ exposed.
 # Documents
 [![Postman](https://img.shields.io/badge/docs-postman-brightgreen.svg)](https://documenter.getpostman.com/view/11181125/2s93CSnq3A)
 
+Please note that the API being used to fetch the Data for credit cards will no longer be active and working as of:
+
+**April 15th, 2023, 23:59 CET.**
+
 ## Routes
 **The default server address is `http://localhost:4567`** 
 

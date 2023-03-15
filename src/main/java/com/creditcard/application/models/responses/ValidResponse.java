@@ -1,4 +1,6 @@
-package com.creditcard.application.models.cards;
+package com.creditcard.application.models.responses;
+
+import com.creditcard.application.models.cards.CardResponse;
 
 /**
  * Once a CreditCard is accepted, this model is used to wrap the data for easy access later
