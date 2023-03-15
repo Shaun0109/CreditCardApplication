@@ -1,110 +1,53 @@
 {
-  "cardNumber" : "4581124648791284",
+  "cardNumber" : "5142053101015298",
   "cardHolder" : "Shaun Dumas",
-  "id" : "5ef189d9-2dab-422e-aeaf-24d85078ed75",
-  "details" : {
-    "number" : {
-      "length" : 16,
-      "luhn" : true
-    },
-    "scheme" : "visa",
-    "type" : "debit",
-    "brand" : "Traditional",
-    "prepaid" : false,
-    "country" : {
-      "numeric" : "356",
-      "alpha2" : "IN",
-      "name" : "India",
-      "emoji" : "🇮🇳",
-      "currency" : "INR",
-      "latitude" : 20,
-      "longitude" : 77
-    },
-    "bank" : {
-      "name" : "IDBI BANK, LTD.",
-      "url" : "www.idbi.com",
-      "phone" : "(+91-22) 66937000"
-    }
-  }
-}~
-{
-  "cardNumber" : "4581124648791283",
-  "cardHolder" : "Shaun Dumas",
-  "id" : "3af9db41-f1db-4214-8a6e-fadd911b886d",
-  "details" : {
-    "number" : {
-      "length" : 16,
-      "luhn" : true
-    },
-    "scheme" : "visa",
-    "type" : "debit",
-    "brand" : "Traditional",
-    "prepaid" : false,
-    "country" : {
-      "numeric" : "356",
-      "alpha2" : "IN",
-      "name" : "India",
-      "emoji" : "🇮🇳",
-      "currency" : "INR",
-      "latitude" : 20,
-      "longitude" : 77
-    },
-    "bank" : {
-      "name" : "IDBI BANK, LTD.",
-      "url" : "www.idbi.com",
-      "phone" : "(+91-22) 66937000"
-    }
-  }
-}~
-{
-  "cardNumber" : "5262053101015296",
-  "cardHolder" : "Shaun Dumas",
-  "id" : "15c2025f-5fce-4418-8f80-11b927d2b8f8",
+  "id" : "de52e810-34d6-4aed-995f-d958f7b0ff69",
   "details" : {
     "number" : { },
     "scheme" : "mastercard",
-    "type" : "credit",
-    "brand" : "Standard",
+    "type" : "debit",
+    "brand" : "Debit",
     "prepaid" : false,
     "country" : {
-      "numeric" : "710",
-      "alpha2" : "ZA",
-      "name" : "South Africa",
-      "emoji" : "🇿🇦",
-      "currency" : "ZAR",
-      "latitude" : -29,
-      "longitude" : 24
+      "numeric" : "840",
+      "alpha2" : "US",
+      "name" : "United States of America",
+      "emoji" : "🇺🇸",
+      "currency" : "USD",
+      "latitude" : 38,
+      "longitude" : -97
     },
     "bank" : {
-      "name" : "CITIBANK USA, N.A.",
-      "url" : "online.citibank.com",
-      "phone" : "1-800-374-9700"
+      "name" : "FISERV SOLUTIONS, INC.",
+      "url" : "www.fiserv.com",
+      "phone" : "262-879-5000"
     }
-  }
-}~
-{
-  "cardNumber" : "5262053101015297",
+  },
+  "isBanned" : false
+}~{
+  "cardNumber" : "5142053101015291",
   "cardHolder" : "Shaun Dumas",
-  "id" : "8b49f280-f8e9-4139-a483-81bee68e54d3",
+  "id" : "b579d6cf-a25d-43f9-b964-ced12a5ca2f1",
   "details" : {
     "number" : { },
     "scheme" : "mastercard",
-    "type" : "credit",
-    "brand" : "Standard",
+    "type" : "debit",
+    "brand" : "Debit",
     "prepaid" : false,
     "country" : {
-      "numeric" : "710",
-      "alpha2" : "ZA",
-      "name" : "South Africa",
-      "emoji" : "🇿🇦",
-      "currency" : "ZAR",
-      "latitude" : -29,
-      "longitude" : 24
+      "numeric" : "840",
+      "alpha2" : "US",
+      "name" : "United States of America",
+      "emoji" : "🇺🇸",
+      "currency" : "USD",
+      "latitude" : 38,
+      "longitude" : -97
     },
     "bank" : {
-      "name" : "CITIBANK USA, N.A.",
-      "url" : "online.citibank.com",
-      "phone" : "1-800-374-9700"
+      "name" : "FISERV SOLUTIONS, INC.",
+      "url" : "www.fiserv.com",
+      "phone" : "262-879-5000"
     }
-  }
+  },
+  "isBanned" : false
 }~

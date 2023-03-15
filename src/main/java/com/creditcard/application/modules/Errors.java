@@ -1,9 +1,6 @@
 package com.creditcard.application.modules;
 
-import com.creditcard.application.models.exceptions.BannedCountryException;
-import com.creditcard.application.models.exceptions.DuplicateCardException;
-import com.creditcard.application.models.exceptions.InvalidCardException;
-import com.creditcard.application.models.exceptions.UnBannedCountryException;
+import com.creditcard.application.models.exceptions.*;
 import com.creditcard.application.models.responses.ResponseError;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
@@ -47,6 +44,12 @@ public abstract class Errors {
         );
     }
 
+    /**
+     * Error Response for when there is any duplicated card detected
+     *
+     * @param ex The exception
+     * @return The response in an error form
+     */
     public ResponseError duplicateCard(DuplicateCardException ex) {
         // I use this because it is a fun easter-egg response code
         int HTTP_TEAPOT = 418;
@@ -57,6 +60,42 @@ public abstract class Errors {
         );
     }
 
+    /**
+     * Error Response for when there is a problem when loading the credit cards from text files
+     *
+     * @param ex The exception
+     * @return The response in an error form
+     */
+    public ResponseError loadCards(LoadCardsException ex) {
+        // I use this because it is a fun easter-egg response code
+        return new ResponseError(
+                SC_BAD_REQUEST,
+                "There was an issue trying to load the cards from the text file.",
+                ex.getMessage()
+        );
+    }
+
+    /**
+     * Error Response for when there is a problem when loading the countries from text files
+     *
+     * @param ex The exception
+     * @return The response in an error form
+     */
+    public ResponseError loadCountries(LoadCountriesException ex) {
+        // I use this because it is a fun easter-egg response code
+        return new ResponseError(
+                SC_BAD_REQUEST,
+                "There was an issue trying to load the cards from the text file.",
+                ex.getMessage()
+        );
+    }
+
+    /**
+     * Error Response for when the country of the card being created is banned
+     *
+     * @param ex The exception
+     * @return The response in an error form
+     */
     public ResponseError bannedCountry(BannedCountryException ex) {
         return new ResponseError(
                 SC_BAD_REQUEST,
@@ -65,6 +104,12 @@ public abstract class Errors {
         );
     }
 
+    /**
+     * Error Response for when there is a problem when trying to unban a country
+     *
+     * @param ex The exception
+     * @return The response in an error form
+     */
     public ResponseError unBannedCountry(UnBannedCountryException ex) {
         return new ResponseError(
                 SC_BAD_REQUEST,

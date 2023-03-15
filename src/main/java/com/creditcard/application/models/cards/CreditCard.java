@@ -14,4 +14,5 @@ public class CreditCard {
     private UUID id = UUID.randomUUID();
     // This is the data from the 3rd party api.
     private CardResponse details;
+    private Boolean isBanned = false;
 }

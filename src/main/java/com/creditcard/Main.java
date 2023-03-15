@@ -3,16 +3,11 @@ package com.creditcard;
 import com.creditcard.application.datahandler.CoolTempDatabase;
 import com.creditcard.application.models.cards.CountryList;
 import com.creditcard.application.models.cards.CreditCard;
-import com.creditcard.application.models.exceptions.ObjectMapperException;
 import com.creditcard.application.models.responses.ResponseError;
 import com.creditcard.application.modules.CreditCardModule;
 import com.creditcard.application.modules.ErrorHandler;
 import com.creditcard.application.modules.FileModule;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
-import java.io.IOException;
-import java.io.StringWriter;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,32 +20,14 @@ import static spark.Spark.*;
  */
 public class Main {
 
-    /**
-     * Converts the Object/Model to json, so it can be used in a response
-     *
-     * @param data The Object/Model that will be mapped to json
-     * @return The Object/Model in json form
-     */
-    private static String dataToJson(Object data) throws ObjectMapperException {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.enable(SerializationFeature.INDENT_OUTPUT);
-            StringWriter sw = new StringWriter();
-            mapper.writeValue(sw, data);
-            return sw.toString();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            throw new ObjectMapperException(ex.getMessage());
-        }
-    }
-
-    public static void main(String[] args) throws ObjectMapperException {
-        final FileModule fileModule     = new FileModule();
+    public static void main(String[] args) {
+        // Initialise the error handler
         final ErrorHandler errorHandler = new ErrorHandler();
 
         try {
             // Initialise core modules
-            final CoolTempDatabase database = new CoolTempDatabase(fileModule.loadCards(), fileModule.loadBannedCountries());
+            final FileModule fileModule     = new FileModule();
+            final CoolTempDatabase database = new CoolTempDatabase(fileModule);
             final CreditCardModule module   = new CreditCardModule(database);
 
             // All the routes that can be accessed
@@ -61,14 +38,14 @@ public class Main {
                         response.type("application/json");
                         try {
                             CreditCard creditCard = module.insertCreditCard(request);
-                            String json           = dataToJson(creditCard);
+                            String json           = database.dataToJson(creditCard);
                             response.status(SC_OK);
                             fileModule.save(json + "~", "cards.txt", true);
                             return json;
                         } catch (Exception ex) {
                             ResponseError error = errorHandler.handleException(ex);
                             response.status(error.getStatusCode());
-                            return dataToJson(error);
+                            return database.dataToJson(error);
                         }
                     });
 
@@ -78,11 +55,11 @@ public class Main {
                         try {
                             List<CreditCard> fetchedCards = database.getAllCards();
                             response.status(SC_OK);
-                            return dataToJson(fetchedCards);
+                            return database.dataToJson(fetchedCards);
                         } catch (Exception ex) {
                             ResponseError error = errorHandler.handleException(ex);
                             response.status(error.getStatusCode());
-                            return dataToJson(error);
+                            return database.dataToJson(error);
                         }
                     });
 
@@ -92,11 +69,11 @@ public class Main {
                         try {
                             CreditCard card = database.getCardById(UUID.fromString(request.params(":id")));
                             response.status(SC_OK);
-                            return dataToJson(card);
+                            return database.dataToJson(card);
                         } catch (Exception ex) {
                             ResponseError error = errorHandler.handleException(ex);
                             response.status(error.getStatusCode());
-                            return dataToJson(error);
+                            return database.dataToJson(error);
                         }
                     });
                 });
@@ -109,20 +86,20 @@ public class Main {
                             try {
                                 response.status(SC_OK);
                                 CountryList countryList = module.banCountry(request);
-                                String json             = dataToJson(countryList);
+                                String json             = database.dataToJson(countryList);
                                 fileModule.saveCountries(countryList.getCountries(), true);
                                 return String.format("{\"banned\":%s}", json);
                             } catch (Exception ex) {
                                 ResponseError error = errorHandler.handleException(ex);
                                 response.status(error.getStatusCode());
-                                return dataToJson(error);
+                                return database.dataToJson(error);
                             }
                         });
 
                         // Retrieves the list of banned countries
                         get("/", (request, response) -> {
                             response.type("application/json");
-                            return  String.format("{\"banned\":%s}", dataToJson(database.getBannedCountries())
+                            return  String.format("{\"banned\":%s}", database.dataToJson(database.getBannedCountries())
                             );
                         });
                     });
@@ -134,11 +111,11 @@ public class Main {
                             response.status(SC_OK);
                             CountryList unbanned = module.unbanCountry(request);
                             fileModule.saveCountries(database.getBannedCountries(), false);
-                            return String.format("{\"unbanned\":%s}", dataToJson(unbanned));
+                            return String.format("{\"unbanned\":%s}", database.dataToJson(unbanned));
                         } catch (Exception ex) {
                             ResponseError error = errorHandler.handleException(ex);
                             response.status(error.getStatusCode());
-                            return dataToJson(error);
+                            return database.dataToJson(error);
                         }
                     });
                 });
@@ -146,7 +123,7 @@ public class Main {
         } catch (Exception ex) {
             ex.printStackTrace();
             //TODO: Implement logger
-            System.out.println(dataToJson(errorHandler.handleException(ex)));
+            System.out.println(errorHandler.handleException(ex));
         }
     }
 }
