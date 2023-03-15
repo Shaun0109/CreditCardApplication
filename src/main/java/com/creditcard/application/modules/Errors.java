@@ -1,7 +1,10 @@
 package com.creditcard.application.modules;
 
-import com.creditcard.application.models.exceptions.ResponseError;
+import com.creditcard.application.models.exceptions.BannedCountryException;
+import com.creditcard.application.models.exceptions.DuplicateCardException;
 import com.creditcard.application.models.exceptions.InvalidCardException;
+import com.creditcard.application.models.exceptions.UnBannedCountryException;
+import com.creditcard.application.models.responses.ResponseError;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 
@@ -41,6 +44,32 @@ public abstract class Errors {
                 HTTP_TEAPOT,
                 "The card is an invalid card. No coffee for you!",
                 "Invalid credit card: " + ex
+        );
+    }
+
+    public ResponseError duplicateCard(DuplicateCardException ex) {
+        // I use this because it is a fun easter-egg response code
+        int HTTP_TEAPOT = 418;
+        return new ResponseError(
+                HTTP_TEAPOT,
+                "The card is an invalid card. No coffee for you!",
+                "Invalid credit card: " + ex
+        );
+    }
+
+    public ResponseError bannedCountry(BannedCountryException ex) {
+        return new ResponseError(
+                SC_BAD_REQUEST,
+                "The country is banned and cannot be accepted.",
+                "Banned country: " + ex
+        );
+    }
+
+    public ResponseError unBannedCountry(UnBannedCountryException ex) {
+        return new ResponseError(
+                SC_BAD_REQUEST,
+                "There was an issue while trying to ban the provided country.",
+                ex.getMessage()
         );
     }
 

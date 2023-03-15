@@ -1,65 +1,7 @@
 {
-  "cardNumber" : "4581124648791280",
-  "cardHolder" : "Freddy Krueger",
-  "id" : "a7d02767-eea5-4740-8629-7c7b19475ec3",
-  "details" : {
-    "number" : {
-      "length" : 16,
-      "luhn" : true
-    },
-    "scheme" : "visa",
-    "type" : "debit",
-    "brand" : "Traditional",
-    "prepaid" : false,
-    "country" : {
-      "numeric" : "356",
-      "alpha2" : "IN",
-      "name" : "India",
-      "emoji" : "🇮🇳",
-      "currency" : "INR",
-      "latitude" : 20,
-      "longitude" : 77
-    },
-    "bank" : {
-      "name" : "IDBI BANK, LTD.",
-      "url" : "www.idbi.com",
-      "phone" : "(+91-22) 66937000"
-    }
-  }
-}~
-{
-  "cardNumber" : "4581124648791281",
-  "cardHolder" : "Simon Peterson",
-  "id" : "0f3eb786-1dab-4857-bc19-19089b6877ae",
-  "details" : {
-    "number" : {
-      "length" : 16,
-      "luhn" : true
-    },
-    "scheme" : "visa",
-    "type" : "debit",
-    "brand" : "Traditional",
-    "prepaid" : false,
-    "country" : {
-      "numeric" : "356",
-      "alpha2" : "IN",
-      "name" : "India",
-      "emoji" : "🇮🇳",
-      "currency" : "INR",
-      "latitude" : 20,
-      "longitude" : 77
-    },
-    "bank" : {
-      "name" : "IDBI BANK, LTD.",
-      "url" : "www.idbi.com",
-      "phone" : "(+91-22) 66937000"
-    }
-  }
-}~
-{
-  "cardNumber" : "4581124648791282",
-  "cardHolder" : "Jimmy Davis",
-  "id" : "bfecd948-a964-4a81-89f8-a3b49dc5a9e1",
+  "cardNumber" : "4581124648791284",
+  "cardHolder" : "Shaun Dumas",
+  "id" : "5ef189d9-2dab-422e-aeaf-24d85078ed75",
   "details" : {
     "number" : {
       "length" : 16,
@@ -87,8 +29,8 @@
 }~
 {
   "cardNumber" : "4581124648791283",
-  "cardHolder" : "Fredrica Jansen",
-  "id" : "dfdde578-29ef-4000-8134-877a39304939",
+  "cardHolder" : "Shaun Dumas",
+  "id" : "3af9db41-f1db-4214-8a6e-fadd911b886d",
   "details" : {
     "number" : {
       "length" : 16,
@@ -115,27 +57,54 @@
   }
 }~
 {
-  "cardNumber" : "4571124648791284",
+  "cardNumber" : "5262053101015296",
   "cardHolder" : "Shaun Dumas",
-  "id" : "33696ea0-271e-423f-9d2d-2c43fd80a79a",
+  "id" : "15c2025f-5fce-4418-8f80-11b927d2b8f8",
   "details" : {
-    "number" : {
-      "length" : 16,
-      "luhn" : true
-    },
-    "scheme" : "visa",
-    "type" : "debit",
-    "brand" : "Traditional",
+    "number" : { },
+    "scheme" : "mastercard",
+    "type" : "credit",
+    "brand" : "Standard",
     "prepaid" : false,
     "country" : {
-      "numeric" : "208",
-      "alpha2" : "DK",
-      "name" : "Denmark",
-      "emoji" : "🇩🇰",
-      "currency" : "DKK",
-      "latitude" : 56,
-      "longitude" : 10
+      "numeric" : "710",
+      "alpha2" : "ZA",
+      "name" : "South Africa",
+      "emoji" : "🇿🇦",
+      "currency" : "ZAR",
+      "latitude" : -29,
+      "longitude" : 24
     },
-    "bank" : null
+    "bank" : {
+      "name" : "CITIBANK USA, N.A.",
+      "url" : "online.citibank.com",
+      "phone" : "1-800-374-9700"
+    }
+  }
+}~
+{
+  "cardNumber" : "5262053101015297",
+  "cardHolder" : "Shaun Dumas",
+  "id" : "8b49f280-f8e9-4139-a483-81bee68e54d3",
+  "details" : {
+    "number" : { },
+    "scheme" : "mastercard",
+    "type" : "credit",
+    "brand" : "Standard",
+    "prepaid" : false,
+    "country" : {
+      "numeric" : "710",
+      "alpha2" : "ZA",
+      "name" : "South Africa",
+      "emoji" : "🇿🇦",
+      "currency" : "ZAR",
+      "latitude" : -29,
+      "longitude" : 24
+    },
+    "bank" : {
+      "name" : "CITIBANK USA, N.A.",
+      "url" : "online.citibank.com",
+      "phone" : "1-800-374-9700"
+    }
   }
 }~

@@ -1,8 +1,9 @@
 package com.creditcard.application.modules;
 
-import com.creditcard.application.datahandler.CoolTempDatabase;
 import com.creditcard.application.models.cards.CountryList;
 import com.creditcard.application.models.cards.CreditCard;
+import com.creditcard.application.models.exceptions.LoadCountriesException;
+import com.creditcard.application.models.exceptions.ObjectMapperException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -20,15 +21,16 @@ public class FileModule {
      * @param data The Object/Model that will be mapped to json
      * @return The Object/Model in json form
      */
-    private static String dataToJson(Object data) {
+    private static String dataToJson(Object data) throws ObjectMapperException {
         try {
             ObjectMapper mapper = new ObjectMapper();
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             StringWriter sw = new StringWriter();
             mapper.writeValue(sw, data);
             return sw.toString();
-        } catch (IOException e) {
-            throw new RuntimeException("An error occurred while trying to map the object to JSON.");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            throw new ObjectMapperException(ex.getMessage());
         }
     }
 
@@ -45,8 +47,8 @@ public class FileModule {
             try {
                 CreditCard card = new ObjectMapper().readValue(data, CreditCard.class);
                 cards.put(card.getId(), card);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
         }
         return cards;
@@ -57,8 +59,8 @@ public class FileModule {
      *
      * @return The list of countries to be banned in CoolTempDatabase
      */
-    public ArrayList<String> loadBannedCountries() {
-        ArrayList<String> countries;
+    public ArrayList<String> loadBannedCountries() throws Exception {
+        ArrayList<String> countries = new ArrayList<>();
         List<String> data = Arrays.asList(
                 load("banned-countries.txt").replaceAll("\n", "").split(",")
         );
@@ -69,18 +71,14 @@ public class FileModule {
             try {
                 String create           = String.format("{\"countries\":%s}", dataToJson(data));
                 CountryList countryList = new ObjectMapper().readValue(create, CountryList.class);
-                countries               = new ArrayList<>(countryList.getCountries());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                countries.addAll(countryList.getCountries());
+            } catch (IOException ex) {
+                throw new LoadCountriesException(ex.getMessage());
+            } catch (ObjectMapperException ex) {
+                throw new ObjectMapperException(ex.getMessage());
             }
-        } else {
-            countries = new ArrayList<>();
         }
         return countries;
-    }
-
-    public String getBannedCountries(CoolTempDatabase database) {
-        return String.format("{\"banned\":%s}", dataToJson(database.getBannedCountries()));
     }
 
     /**
