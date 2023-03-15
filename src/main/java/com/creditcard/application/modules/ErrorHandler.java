@@ -1,9 +1,6 @@
 package com.creditcard.application.modules;
 
-import com.creditcard.application.models.exceptions.BannedCountryException;
-import com.creditcard.application.models.exceptions.DuplicateCardException;
-import com.creditcard.application.models.exceptions.InvalidCardException;
-import com.creditcard.application.models.exceptions.UnBannedCountryException;
+import com.creditcard.application.models.exceptions.*;
 import com.creditcard.application.models.responses.ResponseError;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
@@ -28,6 +25,8 @@ public class ErrorHandler extends Errors {
             case UnBannedCountryException ubc      -> unBannedCountry(ubc);
             case InvalidCardException ice          -> invalid(ice);
             case DuplicateCardException dce        -> duplicateCard(dce);
+            case LoadCardsException lce            -> loadCards(lce);
+            case LoadCountriesException lce        -> loadCountries(lce);
             case NullPointerException npe          -> notFound(npe);
             default                                -> unexpectedError(ex);
         };

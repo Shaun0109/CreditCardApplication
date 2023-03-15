@@ -3,7 +3,13 @@ package com.creditcard.application.datahandler;
 import com.creditcard.application.models.cards.CardCreate;
 import com.creditcard.application.models.cards.CardResponse;
 import com.creditcard.application.models.cards.CreditCard;
+import com.creditcard.application.models.exceptions.ObjectMapperException;
+import com.creditcard.application.modules.FileModule;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,9 +21,13 @@ import java.util.stream.Collectors;
  */
 public class CoolTempDatabase {
 
-    public CoolTempDatabase(Map<UUID, CreditCard> cards, ArrayList<String> bannedCountries) {
-        this.cards           = cards;
-        this.bannedCountries = bannedCountries;
+    public CoolTempDatabase(FileModule fileModule) throws Exception {
+
+        // Load the existing banned countries and credit cards into memory
+        ArrayList<String> countries = fileModule.loadBannedCountries();
+
+        this.cards           = fileModule.loadCards(countries);
+        this.bannedCountries = countries;
     }
 
     // Acts as the database which loads the credit cards into memory from the cards.txt
@@ -25,6 +35,25 @@ public class CoolTempDatabase {
 
     // Contains the list of banned countries.
     private final ArrayList<String> bannedCountries;
+
+    /**
+     * Converts the Object/Model to json, so it can be used in a response
+     *
+     * @param data The Object/Model that will be mapped to json
+     * @return The Object/Model in json form
+     */
+    public String dataToJson(Object data) throws ObjectMapperException {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+            StringWriter sw = new StringWriter();
+            mapper.writeValue(sw, data);
+            return sw.toString();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            throw new ObjectMapperException(ex.getMessage());
+        }
+    }
 
     // =================================================================================================================
     // =============================================== Credit Cards ====================================================
@@ -113,6 +142,12 @@ public class CoolTempDatabase {
         ArrayList<String> newBan = new ArrayList<>();
         for (String country : countries) {
             if (!isBanned(country)) {
+                // Ban any of the existing cards that belong to this country
+                cards.values().forEach(creditCard -> {
+                    if (!creditCard.getIsBanned() & creditCard.getDetails().getCountry().getName().equalsIgnoreCase(country)) {
+                        creditCard.setIsBanned(true);
+                    }
+                });
                 newBan.add(country);
             }
         }
@@ -127,5 +162,15 @@ public class CoolTempDatabase {
      */
     public void unbanCountries(List<String> countries) {
         bannedCountries.removeAll(countries);
+        for (String country : countries) {
+            if (!isBanned(country)) {
+                // Unban any of the existing cards that belong to this country
+                cards.values().forEach(creditCard -> {
+                    if (creditCard.getIsBanned() & creditCard.getDetails().getCountry().getName().equalsIgnoreCase(country)) {
+                        creditCard.setIsBanned(false);
+                    }
+                });
+            }
+        }
     }
 }

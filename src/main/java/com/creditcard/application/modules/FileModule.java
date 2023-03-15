@@ -2,6 +2,7 @@ package com.creditcard.application.modules;
 
 import com.creditcard.application.models.cards.CountryList;
 import com.creditcard.application.models.cards.CreditCard;
+import com.creditcard.application.models.exceptions.LoadCardsException;
 import com.creditcard.application.models.exceptions.LoadCountriesException;
 import com.creditcard.application.models.exceptions.ObjectMapperException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,7 +22,7 @@ public class FileModule {
      * @param data The Object/Model that will be mapped to json
      * @return The Object/Model in json form
      */
-    private static String dataToJson(Object data) throws ObjectMapperException {
+    private String dataToJson(Object data) throws ObjectMapperException {
         try {
             ObjectMapper mapper = new ObjectMapper();
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -38,18 +39,33 @@ public class FileModule {
      * Loads the saved CreditCards inside cards.txt
      * @return The list of CreditCards to be loaded into the CoolTempDatabase
      */
-    public Map<UUID, CreditCard> loadCards() {
+    public Map<UUID, CreditCard> loadCards(ArrayList<String> bannedCountries) throws Exception {
         Map<UUID, CreditCard> cards = new HashMap<>();
         List<String> cardsData      = Arrays.asList(load("cards.txt").split("~"));
+
+        boolean isModified = false;
 
         // Remove the empty last line and then load in all the CreditCards from the text file
         for (String data : cardsData.subList(0, cardsData.size() - 1)) {
             try {
                 CreditCard card = new ObjectMapper().readValue(data, CreditCard.class);
+
+                // If the country is banned and the card is not banned, ban it and then say that it was modified
+                boolean isCountryBanned = bannedCountries.contains(card.getDetails().getCountry().getName());
+
+                // Ban or unban the card if the country is banned
+                if (!(card.getIsBanned() && isCountryBanned)) {
+                    card.setIsBanned(true);
+                    isModified = true;
+                }
                 cards.put(card.getId(), card);
             } catch (IOException ex) {
-                throw new RuntimeException(ex);
+                throw new LoadCardsException(ex.getMessage());
             }
+        }
+        // Only save the cards if there was a change
+        if (isModified) {
+            saveCards(cards.values());
         }
         return cards;
     }
@@ -91,6 +107,26 @@ public class FileModule {
             out.println(data);
         } catch (Exception e) {
             System.out.println("[Error] - Could not save to file " + fileName);
+        }
+    }
+
+    /**
+     * Saves the provided cards to the text file.
+     * @param cards Cards to be written to the text file
+     * @throws ObjectMapperException If there is an Object mapper related exception
+     */
+    public void saveCards(Collection<CreditCard> cards) throws ObjectMapperException {
+        if (!cards.isEmpty()) {
+
+            // Convert the cards to Strings so they can be saved
+            ArrayList<String> json = new ArrayList<>();
+
+            for (CreditCard card: cards) {
+                json.add(dataToJson(card));
+            }
+            
+            // Save any changes to the cards
+            save(String.join("~", json) + "~", "cards.txt", false);
         }
     }
 
